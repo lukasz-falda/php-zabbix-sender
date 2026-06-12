@@ -2,7 +2,7 @@
 	"name": "fliix-cloud/php-zabbix-sender",
 	"type": "library",
 	"description": "PHP Implementation of Zabbix Sender (supports Zabbix 7.x) forked from webmasterskaya/php-zabbix-sender",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"require": {
 		"php": "^8.4",
 		"ext-sockets": "*",
