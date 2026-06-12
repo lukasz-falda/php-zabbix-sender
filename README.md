@@ -13,7 +13,7 @@ Official Zabbix Sender docs: <https://www.zabbix.com/documentation/current/en/ma
 
 | Requirement | Version |
 |---|---|
-| PHP | ≥ 8.2 |
+| PHP | ≥ 8.4 |
 | ext-sockets | any |
 | openssl binary | any (needed for PSK connections) |
 
@@ -114,13 +114,12 @@ Keep this value – you will need it both in Zabbix and in your PHP code.
 
 ### Step 2 – Configure PSK in Zabbix
 
-1. Open the Zabbix web UI and navigate to **Configuration → Hosts** (or
-   **Proxies**).
+1. Open the Zabbix web UI and navigate to **Configuration → Hosts**
 2. Select the host that will receive the data.
 3. Go to the **Encryption** tab.
 4. Set **Connections from host** to **PSK**.
 5. Fill in:
-   - **PSK identity** – a human-readable name, e.g. `my-php-sender`
+   - **PSK identity** – a human-readable name, e.g. `hostname`
    - **PSK** – the hex key generated in Step 1.
 6. Save the host.
 
