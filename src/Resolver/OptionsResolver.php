@@ -36,6 +36,12 @@ final class OptionsResolver
 			->allowedTypes('int');
 
 		$resolver
+			->define('timeout')
+			->default(30)
+			->allowedTypes('int')
+			->info('Socket read/write timeout in seconds.');
+
+		$resolver
 			->define('tls-connect')
 			->allowedTypes('string')
 			->info(

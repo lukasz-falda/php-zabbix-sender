@@ -39,10 +39,13 @@ final class PskConnection implements ConnectionInterface
 
 	private string $cipherList;
 
+	private array $options;
+
 
 	public function __construct(array $options)
 	{
-		$options = OptionsResolver::resolve($options);
+		$this->options = OptionsResolver::resolve($options);
+		$options = $this->options;
 
 		// Use TLS 1.2 explicitly: PSK cipher suites are part of TLS 1.2 (RFC 4279)
 		// and are not available in TLS 1.3. OpenSSL 3.x disables them by default,
@@ -51,9 +54,8 @@ final class PskConnection implements ConnectionInterface
 		$this->cipherList = $options['tls-cipher'] ?? self::DEFAULT_PSK_CIPHER_LIST;
 
 		$this->command = sprintf(
-			'openssl s_client -quiet -connect %s:%d -psk_identity %s -psk %s -tls1_2 -cipher %s',
-			escapeshellarg($options['server']),
-			(int) $options['port'],
+			'openssl s_client -quiet -connect %s -psk_identity %s -psk %s -tls1_2 -cipher %s',
+			escapeshellarg($this->endpoint),
 			escapeshellarg($options['tls-psk-identity']),
 			escapeshellarg($options['tls-psk']),
 			escapeshellarg($this->cipherList)
@@ -80,6 +82,13 @@ final class PskConnection implements ConnectionInterface
 		if (!is_resource($this->process)) {
 			throw new RuntimeException('Failed to open connection.');
 		}
+
+		$timeout = max(1, (int) ($this->options['timeout'] ?? 30));
+		foreach ($this->pipes as $pipe) {
+			if (is_resource($pipe)) {
+				stream_set_timeout($pipe, $timeout);
+			}
+		}
 	}
 
 	/**
@@ -91,11 +100,11 @@ final class PskConnection implements ConnectionInterface
 			return false;
 		}
 
-		$output = stream_get_contents($this->pipes[1]);
+		$output = $this->readStream($this->pipes[1]);
 
 		$errorOutput = '';
 		if (isset($this->pipes[2])) {
-			$errorOutput = trim(stream_get_contents($this->pipes[2]) ?: '');
+			$errorOutput = trim($this->readStream($this->pipes[2]) ?: '');
 		}
 
 		if ($output === false || $output === '') {
@@ -170,5 +179,31 @@ final class PskConnection implements ConnectionInterface
 		proc_close($this->process);
 		$this->process = null;
 		$this->pipes = [];
+	}
+
+	private function readStream(mixed $stream): false|string
+	{
+		if (!is_resource($stream)) {
+			return false;
+		}
+
+		$data = '';
+		while (!feof($stream)) {
+			$chunk = fread($stream, 8192);
+			if ($chunk === false) {
+				return false;
+			}
+			if ($chunk === '') {
+				$meta = stream_get_meta_data($stream);
+				if ($meta['timed_out'] ?? false) {
+					break;
+				}
+
+				continue;
+			}
+			$data .= $chunk;
+		}
+
+		return $data;
 	}
 }

@@ -128,22 +128,24 @@ class ZabbixSender implements ZabbixSenderInterface
 	{
 		$data = $this->packedData($this->data);
 
-		$this->open();
+		try {
+			$this->open();
 
-		$data_size = strlen($data);
-		$sent_size = $this->write($data);
+			$data_size = strlen($data);
+			$sent_size = $this->write($data);
 
-		if ($sent_size === false || $sent_size != $data_size) {
-			throw new RuntimeException('cannot send request data');
+			if ($sent_size === false || $sent_size != $data_size) {
+				throw new RuntimeException('cannot send request data');
+			}
+
+			$response = $this->read();
+
+			if ($response === false) {
+				throw new RuntimeException('cannot receive response');
+			}
+		} finally {
+			$this->close();
 		}
-
-		$response = $this->read();
-
-		if ($response === false) {
-			throw new RuntimeException('cannot receive response');
-		}
-
-		$this->close();
 
 		if (!str_starts_with($response, "ZBXD\1")) {
 			$this->lastResponseInfo = null;
@@ -178,9 +180,6 @@ class ZabbixSender implements ZabbixSenderInterface
 
 			return true;
 		}
-
-
-		$this->lastResponseInfo = null;
 
 		return false;
 

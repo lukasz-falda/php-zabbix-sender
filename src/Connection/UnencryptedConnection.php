@@ -73,11 +73,14 @@ final class UnencryptedConnection implements ConnectionInterface
 		);
 
 		if (!is_resource($this->socket)) {
-			$message = !empty($errorMessage)
-				? "Failed to open connection. Error: $errorMessage"
+			$message = !empty($error_message)
+				? "Failed to open connection. Error: $error_message"
 				: 'Failed to open connection.';
 			throw new RuntimeException($message);
 		}
+
+		$timeout = (int) ($this->options['timeout'] ?? 30);
+		stream_set_timeout($this->socket, max(1, $timeout));
 	}
 
 	/**
@@ -95,10 +98,18 @@ final class UnencryptedConnection implements ConnectionInterface
 			if ($buffer === false) {
 				return false;
 			}
+			if ($buffer === '') {
+				$meta = stream_get_meta_data($this->socket);
+				if ($meta['timed_out'] ?? false) {
+					return false;
+				}
+
+				break;
+			}
 			$data .= $buffer;
 		}
 
-		return $data ?: false;
+		return $data !== '' ? $data : false;
 	}
 
 	/**

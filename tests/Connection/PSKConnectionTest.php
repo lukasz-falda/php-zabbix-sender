@@ -38,6 +38,8 @@ class PSKConnectionTest extends TestCase
 		self::assertStringContainsString('openssl s_client', $command);
 		self::assertStringContainsString('-quiet', $command);
 		self::assertStringContainsString('-tls1_2', $command);
+		self::assertStringContainsString('127.0.0.1:10051', $command);
+		self::assertStringNotContainsString('127.0.0.1":10051', $command);
 		self::assertStringContainsString('PSK-AES128-GCM-SHA256:PSK-AES256-GCM-SHA384', $command);
 	}
 
