@@ -1,11 +1,36 @@
 # fliix/php-zabbix-sender
 
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)](https://www.php.org/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/fliix-cloud/php-zabbix-sender/releases)
+[![Zabbix](https://img.shields.io/badge/Zabbix-7.x-red?logo=zabbix&logoColor=white)](https://www.zabbix.com/)
+
 PHP implementation of the Zabbix Sender protocol — compatible with **Zabbix 7.x**.
 
-- ✅ Unencrypted connection to Zabbix Server
-- ✅ TLS PSK connection to Zabbix Server (TLS 1.2, compatible with Zabbix 7.x / OpenSSL 3.x)
+A fork of [`webmasterskaya/php-zabbix-sender`](https://github.com/webmasterskaya/php-zabbix-sender).
 
-Official Zabbix Sender docs: <https://www.zabbix.com/documentation/current/en/manpages/zabbix_sender>
+## Highlights
+
+- Unencrypted **or** TLS PSK connections to Zabbix Server / Proxy
+- PSK uses **TLS 1.2** explicitly — works with **OpenSSL 3.x** and Zabbix 7.x PSK cipher suites (RFC 4279)
+- Simple single-value and **batch** sending
+- Negotiable cipher list, with sane defaults
+- Built on `symfony/options-resolver` + `symfony/validator` for robust option handling
+
+> See the official Zabbix Sender docs:
+> <https://www.zabbix.com/documentation/current/en/manpages/zabbix_sender>
+
+## Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start – unencrypted connection](#quick-start--unencrypted-connection)
+- [Batch mode](#batch-mode)
+- [TLS PSK connection (Zabbix 7.x)](#tls-psk-connection-zabbix-7x)
+- [All available options](#all-available-options)
+- [Protocol compatibility](#protocol-compatibility)
+- [Development](#development)
+- [License](#license)
 
 ---
 
@@ -24,18 +49,6 @@ Official Zabbix Sender docs: <https://www.zabbix.com/documentation/current/en/ma
 ```shell
 composer require fliix-cloud/php-zabbix-sender
 ```
-
-## Development
-
-```shell
-composer test
-composer cs
-composer check
-```
-
-- `composer test` runs the PHPUnit test suite.
-- `composer cs` runs php-cs-fixer in dry-run mode.
-- `composer check` runs both style checks and tests.
 
 ---
 
@@ -211,19 +224,29 @@ This matches the Zabbix protocol docs for `zabbix_sender` and
 
 ## All available options
 
+All options are supported by both connection types unless noted.
+
 | Option | Type | Default | Description |
-|---|---|---|---|
-| `server` | string | *(required)* | Zabbix Server or Proxy hostname / IP |
-| `port` | int | `10051` | Zabbix Server port |
-| `host` | string | *(required)* | Zabbix host name the data belongs to |
-| `tls-connect` | string | `unencrypted` | Encryption mode: `unencrypted`, `psk` |
-| `tls-psk-identity` | string | – | PSK identity (required when `tls-connect=psk`) |
-| `tls-psk` | string | – | PSK hex key (required when `tls-connect=psk`) |
-| `tls-cipher` | string | `PSK-AES128-GCM-SHA256:PSK-AES256-GCM-SHA384:PSK-AES128-CBC-SHA256:PSK-AES256-CBC-SHA384:PSK-AES128-CBC-SHA:PSK-AES256-CBC-SHA` | Override TLS 1.2 cipher for PSK connections |
-| `tls-cipher13` | string | – | Override TLS 1.3 ciphersuite (OpenSSL ≥ 1.1.1 only) |
+| --- | --- | --- | --- |
+| `server` | `string` | **required** | Zabbix Server or Proxy hostname / IP |
+| `port` | `int` | `10051` | Zabbix Server port |
+| `timeout` | `int` | `30` | Socket read/write timeout in seconds |
+| `host` | `string` | **required** | Zabbix host name the data belongs to |
+| `tls-connect` | `string` | `unencrypted` | `unencrypted` or `psk` (PSK only) |
+| `tls-psk-identity` | `string` | – | Required when `tls-connect=psk` |
+| `tls-psk` | `string` | – | Required when `tls-connect=psk`; must be a hex-encoded key |
+| `tls-cipher` | `string` | _see below_ | Override TLS 1.2 PSK cipher list |
+| `tls-cipher13` | `string` | – | Override TLS 1.3 ciphersuite (OpenSSL ≥ 1.1.1) |
+
+The default — used when `tls-cipher` is not set and `tls-connect=psk` — is:
+
+```
+PSK-AES128-GCM-SHA256:PSK-AES256-GCM-SHA384:PSK-AES128-CBC-SHA256:PSK-AES256-CBC-SHA384:PSK-AES128-CBC-SHA:PSK-AES256-CBC-SHA
+```
 
 ---
 
 ## License
 
-Apache-2.0
+This project is licensed under the **Apache License 2.0**.  
+See the [LICENSE](LICENSE) file for the full text.
