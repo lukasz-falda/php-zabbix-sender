@@ -100,7 +100,7 @@ final class UnencryptedConnection implements ConnectionInterface
 			}
 			if ($buffer === '') {
 				$meta = stream_get_meta_data($this->socket);
-				if ($meta['timed_out'] ?? false) {
+				if ($meta['timed_out']) {
 					return false;
 				}
 

@@ -6,3 +6,4 @@ tmp
 vendor
 /.phpunit.cache/
 .agentbridge
+composer.lock

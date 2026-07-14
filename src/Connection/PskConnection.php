@@ -195,7 +195,7 @@ final class PskConnection implements ConnectionInterface
 			}
 			if ($chunk === '') {
 				$meta = stream_get_meta_data($stream);
-				if ($meta['timed_out'] ?? false) {
+				if ($meta['timed_out']) {
 					break;
 				}
 

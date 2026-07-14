@@ -26,9 +26,6 @@ class ZabbixSender implements ZabbixSenderInterface
 	private array $options = [];
 	private ConnectionInterface $connection;
 	private ?ResponseInfoInterface $lastResponseInfo = null;
-	/**
-	 * @var true
-	 */
 	private bool $batch = false;
 
 	public function __construct(array $options = [])
@@ -103,7 +100,7 @@ class ZabbixSender implements ZabbixSenderInterface
 			$value = match (true) {
 				$value instanceof JsonSerializable => json_encode(
 					$value,
-					JSON_FORCE_OBJECT | JSON_BIGINT_AS_STRING | JSON_UNESCAPED_UNICODE
+					JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE
 				),
 				$value instanceof ArrayAccess => (array) $value,
 				default => get_object_vars($value),
@@ -111,7 +108,7 @@ class ZabbixSender implements ZabbixSenderInterface
 		}
 
 		if (is_array($value)) {
-			$value = json_encode($value, JSON_FORCE_OBJECT | JSON_BIGINT_AS_STRING | JSON_UNESCAPED_UNICODE);
+			$value = json_encode($value, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE);
 		}
 
 		$data['value'] = trim($value);

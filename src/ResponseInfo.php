@@ -9,31 +9,23 @@ class ResponseInfo implements ResponseInfoInterface
 {
 	/**
 	 * The number of successfully processed items.
-	 *
-	 * @var int|null
 	 */
-	private ?int $processed;
+	private int $processed;
 
 	/**
 	 * The number of failed processing attempts.
-	 *
-	 * @var int|null
 	 */
-	private ?int $failed;
+	private int $failed;
 
 	/**
 	 * The total number of processed items.
-	 *
-	 * @var int|null
 	 */
-	private ?int $total;
+	private int $total;
 
 	/**
 	 * The time spent on processing.
-	 *
-	 * @var float|null
 	 */
-	private ?float $spent;
+	private float $spent;
 
 	/**
 	 * Constructor for the ResponseInfo class.
